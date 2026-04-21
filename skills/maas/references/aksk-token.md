@@ -31,7 +31,7 @@ Host: rs.qiniu.com
 
 ### 步骤三：URL 安全 Base64 编码
 
-对签名结果做 URL Safe Base64 编码（将 + 替换为 -，/ 替换为 _，去除末尾 =）。
+对签名结果做 URL Safe Base64 编码（将 + 替换为 -，/ 替换为 _）。末尾的 `=` 填充**保留**，不要去除。
 
 ### 步骤四：拼接 AccessKey 和签名
 
@@ -61,7 +61,7 @@ const crypto = require('crypto');
 const https = require('https');
 
 function urlsafeBase64Encode(buffer) {
-  return buffer.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return buffer.toString('base64').replace(/\+/g, '-').replace(/\//g, '_');
 }
 
 function signQiniuAccessToken(accessKey, secretKey, method, path, host, contentType = '', xQiniuHeaders = {}, body = '') {
@@ -83,7 +83,7 @@ function signQiniuAccessToken(accessKey, secretKey, method, path, host, contentT
 const ak = 'YOUR_ACCESS_KEY';
 const sk = 'YOUR_SECRET_KEY';
 const method = 'GET';
-const path = '/api/inapi/v3/apikeys';
+const path = '/ai/inapi/v3/apikeys';
 const host = 'api.qiniu.com';
 const contentType = '';
 const body = '';
@@ -95,7 +95,7 @@ const options = {
   path: path,
   method: method,
   headers: {
-    'Authorization': 'QiniuStub ' + token
+    'Authorization': 'Qiniu ' + token
   }
 };
 
@@ -118,7 +118,7 @@ req.end();
 ```js
 async function urlsafeBase64Encode(arrayBuffer) {
   let str = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-  return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return str.replace(/\+/g, '-').replace(/\//g, '_');
 }
 
 async function signQiniuAccessTokenBrowser(accessKey, secretKey, method, path, host, contentType = '', xQiniuHeaders = {}, body = '') {
@@ -149,17 +149,17 @@ async function signQiniuAccessTokenBrowser(accessKey, secretKey, method, path, h
   const ak = 'YOUR_ACCESS_KEY';
   const sk = 'YOUR_SECRET_KEY';
   const method = 'GET';
-  const path = '/api/inapi/v3/apikeys';
+  const path = '/ai/inapi/v3/apikeys';
   const host = 'api.qiniu.com';
   const contentType = '';
   const body = '';
 
   const token = await signQiniuAccessTokenBrowser(ak, sk, method, path, host, contentType, {}, body);
 
-  fetch('https://api.qiniu.com/api/inapi/v3/apikeys', {
+  fetch('https://api.qiniu.com/ai/inapi/v3/apikeys', {
     method: 'GET',
     headers: {
-      'Authorization': 'QiniuStub ' + token
+      'Authorization': 'Qiniu ' + token
     }
   })
     .then(res => res.json())

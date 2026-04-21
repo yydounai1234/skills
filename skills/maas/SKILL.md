@@ -3,7 +3,7 @@ name: maas
 description: >
   通过七牛云 MaaS 平台 API 完成 API Key 管理、用量查询、账单查询、请求日志分析、
   模型市场浏览等任务。所有接口均使用 AK/SK 签名鉴权，基础服务地址为
-  https://api.qiniu.com/api。
+  https://api.qiniu.com/ai。
 type: tool
 best_for:
   - "管理七牛云 MaaS 平台的 API Key（创建、删除、启用/禁用、改名、设限额）"
@@ -32,21 +32,26 @@ scenarios:
 
 **Authorization Header 格式：**
 ```
-Authorization: Bearer Qiniu <AccessKey>:<EncodedSign>
+Authorization: AccessKey>:<EncodedSign>
 ```
 
 **签名算法（以 Node.js 为例）：**
 ```javascript
 const crypto = require('crypto');
 
-function sign(accessKey, secretKey, method, path, host, body, contentType) {
-  const bodyHash = (body && contentType !== 'application/octet-stream')
-    ? crypto.createHash('sha256').update(body).digest('hex')
-    : '';
-
-  const signingStr = [method, path, `Host: ${host}`, `Content-Type: ${contentType}`, '', bodyHash, ''].join('\n');
-  const sign = crypto.createHmac('sha256', secretKey).update(signingStr).digest('base64url');
-  return `Bearer Qiniu ${accessKey}:${sign}`;
+// 参考官方文档：https://developer.qiniu.com/kodo/1201/access-token
+function sign(accessKey, secretKey, method, urlPath, host, contentType = '', body = '') {
+  // method + 空格 + path?query 在同一行
+  let signingStr = `${method} ${urlPath}`;
+  signingStr += `\nHost: ${host}`;
+  if (contentType) signingStr += `\nContent-Type: ${contentType}`;
+  signingStr += '\n\n';
+  if (body && contentType && contentType !== 'application/octet-stream') {
+    signingStr += body;
+  }
+  const hmac = crypto.createHmac('sha1', secretKey).update(signingStr).digest();
+  const encodedSign = hmac.toString('base64').replace(/\+/g, '-').replace(/\//g, '_');
+  return `{accessKey}:${encodedSign}`;
 }
 ```
 
@@ -58,7 +63,7 @@ function sign(accessKey, secretKey, method, path, host, body, contentType) {
 
 | 项目 | 值 |
 |------|----|
-| 服务域名 | `https://api.qiniu.com/api` |
+| 服务域名 | `https://api.qiniu.com/ai` |
 | 模型市场（国内） | `https://api.qnaigc.com` |
 | 模型市场（全球） | `https://openai.sufy.com` |
 | 鉴权方式 | Bearer Qiniu AK/SK 签名 |

@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://api.qiniu.com/api",
+      "url": "https://api.qiniu.com/ai",
       "description": "七牛云线上生产环境"
     }
   ],

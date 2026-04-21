@@ -87,17 +87,20 @@ const ALERTMANAGER_URL = process.env.ALERTMANAGER_URL; // e.g. http://alertmanag
 const POLL_INTERVAL_MS = 5 * 60 * 1000;  // 5 分钟
 const WINDOW_MINUTES = 10;                // 滑动窗口
 
-// ── 七牛 AK/SK 签名 ────────────────────────────────────
+// ── 七牛 AK/SK 签名（HMAC-SHA1 + Bearer Qiniu）
+// 参考官方文档：https://developer.qiniu.com/kodo/1201/access-token
 function makeAuthHeader(method, path, host) {
-  const signingStr = [method, path, `Host: ${host}`, `Content-Type: `, '', '', ''].join('\n');
-  const sign = crypto.createHmac('sha256', QINIU_SK).update(signingStr).digest('base64url');
-  return `Bearer Qiniu ${QINIU_AK}:${sign}`;
+  // method + 空格 + path?query 在同一行，GET 无 body
+  const signingStr = `${method} ${path}\nHost: ${host}\n\n`;
+  const hmac = crypto.createHmac('sha1', QINIU_SK).update(signingStr).digest();
+  const encodedSign = hmac.toString('base64').replace(/\+/g, '-').replace(/\//g, '_');
+  return `{QINIU_AK}:${encodedSign}`;
 }
 
 // ── 调用日志接口 ────────────────────────────────────────
 async function fetchLogTotal(params) {
   const qs = new URLSearchParams({ page: '1', page_size: '1', ...params }).toString();
-  const path = `/api/inapi/v3/stat/log?${qs}`;
+  const path = `/ai/inapi/v3/stat/log?${qs}`;
   const host = 'api.qiniu.com';
   const auth = makeAuthHeader('GET', path, host);
 
