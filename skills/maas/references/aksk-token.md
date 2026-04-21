@@ -42,9 +42,7 @@ Host: rs.qiniu.com
 Authorization: Qiniu <AccessKey>:<encodedSign>
 ```
 
-## 3. 完整示例
-
-## 4. 注意事项
+## 3. 注意事项
 - 所有签名步骤必须严格遵循官方算法说明。
 - X-Qiniu- 开头的自定义头部需排序并格式化。
 - 推荐直接使用七牛云官方 SDK 生成管理凭证，避免手动拼接出错。
@@ -117,8 +115,10 @@ req.end();
 
 ```js
 async function urlsafeBase64Encode(arrayBuffer) {
-  let str = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-  return str.replace(/\+/g, '-').replace(/\//g, '_');
+  const bytes = new Uint8Array(arrayBuffer);
+  let str = '';
+  for (let i = 0; i < bytes.length; i++) str += String.fromCharCode(bytes[i]);
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_');
 }
 
 async function signQiniuAccessTokenBrowser(accessKey, secretKey, method, path, host, contentType = '', xQiniuHeaders = {}, body = '') {

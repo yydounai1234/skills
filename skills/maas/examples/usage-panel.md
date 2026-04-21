@@ -19,7 +19,7 @@
 ### Step 1：获取本月 Token 消耗趋势
 
 ```
-GET /inapi/v3/stat/new
+GET /ai/inapi/v3/stat/new
   ?start=2026-04-01T00:00:00+08:00
   &end=2026-04-30T23:59:59+08:00
   &g=day
@@ -68,7 +68,7 @@ GET /inapi/v3/stat/new
 ### Step 2：获取各 API Key 的用量与配额使用率
 
 ```
-GET /inapi/v3/apikeys
+GET /ai/inapi/v3/apikeys
 ```
 
 **响应结构（核心字段）：**
@@ -97,8 +97,8 @@ GET /inapi/v3/apikeys
 
 **说明：**
 - `totalTokens`：累计消耗的 token 总数
-- `quota.daily.used / limit`：今日已用 / 日限额（0 表示未设限）
-- `quota.monthly.used / limit`：本月已用 / 月限额（0 表示未设限）
+- `quota.daily.used / limit`：今日已用 / 日限额（`-1` 表示未设限）
+- `quota.monthly.used / limit`：本月已用 / 月限额（`-1` 表示未设限）
 
 ---
 
@@ -107,7 +107,7 @@ GET /inapi/v3/apikeys
 若需将用量数据中的 `key` 字段（如 `input`、`output`、`cache_creation`）转换为人类可读名称：
 
 ```
-GET /inapi/v3/market/pricingitems
+GET /ai/inapi/v3/market/pricingitems
 ```
 
 ---
@@ -157,8 +157,8 @@ GET /inapi/v3/market/pricingitems
 
 > 正在拉取本月（2026-04）用量数据和 API Key 配额信息……
 
-（调用 `GET /inapi/v3/stat/new?start=2026-04-01T00:00:00+08:00&end=2026-04-30T23:59:59+08:00&g=day`）  
-（调用 `GET /inapi/v3/apikeys`）
+（调用 `GET /ai/inapi/v3/stat/new?start=2026-04-01T00:00:00+08:00&end=2026-04-30T23:59:59+08:00&g=day`）  
+（调用 `GET /ai/inapi/v3/apikeys`）
 
 ---
 
@@ -194,7 +194,7 @@ GET /inapi/v3/market/pricingitems
 
 ## 注意事项
 
-- `/inapi/v3/stat/new` 接口对时间范围没有严格限制说明，但建议不超过 35 天
+- `/ai/inapi/v3/stat/new` 接口对时间范围没有严格限制说明，但建议不超过 35 天
 - 不同模型的计费项名称可能不同（如图像模型无 `input`/`output` 概念），需根据实际 `name` 字段展示
-- 配额字段 `limit = 0` 表示未设置限额，展示为"未设限"而非"0%"
+- 配额字段 `limit = -1` 表示未设置限额，展示为"未设限"而非"-1%"
 - 时序数据中某天无数据时，该天不会出现在 `values` 数组里，展示时需补 0

@@ -94,7 +94,7 @@ function makeAuthHeader(method, path, host) {
   const signingStr = `${method} ${path}\nHost: ${host}\n\n`;
   const hmac = crypto.createHmac('sha1', QINIU_SK).update(signingStr).digest();
   const encodedSign = hmac.toString('base64').replace(/\+/g, '-').replace(/\//g, '_');
-  return `{QINIU_AK}:${encodedSign}`;
+  return `Qiniu ${QINIU_AK}:${encodedSign}`;
 }
 
 // ── 调用日志接口 ────────────────────────────────────────
@@ -109,6 +109,10 @@ async function fetchLogTotal(params) {
       let body = '';
       res.on('data', (chunk) => { body += chunk; });
       res.on('end', () => {
+        if (res.statusCode !== 200) {
+          reject(new Error(`HTTP ${res.statusCode}: ${body}`));
+          return;
+        }
         try {
           const json = JSON.parse(body);
           resolve(json?.data?.total ?? 0);
@@ -126,10 +130,12 @@ async function fetchLogTotal(params) {
 async function sendAlerts(alerts) {
   const body = JSON.stringify(alerts);
   const url = new URL(ALERTMANAGER_URL);
+  const transport = url.protocol === 'https:' ? https : require('http');
+  const defaultPort = url.protocol === 'https:' ? 443 : 80;
   return new Promise((resolve, reject) => {
-    const req = https.request({
+    const req = transport.request({
       host: url.hostname,
-      port: url.port || 80,
+      port: url.port || defaultPort,
       path: url.pathname,
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
@@ -212,9 +218,12 @@ async function poll() {
   }
 }
 
-// ── 启动 ───────────────────────────────────────────────
-poll().catch(console.error);
-setInterval(() => poll().catch(console.error), POLL_INTERVAL_MS);
+// ── 启动（自调度，避免并发漂移）─────────────────────────
+async function runLoop() {
+  await poll().catch(console.error);
+  setTimeout(runLoop, POLL_INTERVAL_MS);
+}
+runLoop();
 ```
 
 **启动方式：**

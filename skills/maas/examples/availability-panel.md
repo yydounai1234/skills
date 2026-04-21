@@ -22,7 +22,7 @@
 
 **查询全部请求（获取总量）：**
 ```
-GET /inapi/v3/stat/log
+GET /ai/inapi/v3/stat/log
   ?start=2026-04-14T00:00:00+08:00
   &end=2026-04-21T23:59:59+08:00
   &page=1
@@ -35,7 +35,7 @@ GET /inapi/v3/stat/log
 
 **查询失败请求（获取失败量）：**
 ```
-GET /inapi/v3/stat/log
+GET /ai/inapi/v3/stat/log
   ?start=2026-04-14T00:00:00+08:00
   &end=2026-04-21T23:59:59+08:00
   &status=failure
@@ -75,7 +75,7 @@ GET /inapi/v3/stat/log
 
 **关键字段说明：**
 - `items[].code`：HTTP 状态码（200 = 成功；4xx = 客户端错误；5xx = 服务端错误）
-- `items[].state`：`success` / `fail`
+- `items[].state`：请求结果，枚举值为 `success` / `fail`（注意：这是**响应字段**的值，与查询参数 `status` 的枚举值不同，`status` 参数使用 `failure`、`client_error`、`server_error`）
 - `items[].errors`：错误信息列表（可能为空数组）
 - `items[].id`：请求 ID，可用于查询详情
 
@@ -84,7 +84,7 @@ GET /inapi/v3/stat/log
 ### Step 2（可选）：查询客户端错误和服务端错误的细分
 
 ```
-GET /inapi/v3/stat/log
+GET /ai/inapi/v3/stat/log
   ?start=2026-04-14T00:00:00+08:00
   &end=2026-04-21T23:59:59+08:00
   &status=client_error
@@ -92,7 +92,7 @@ GET /inapi/v3/stat/log
 ```
 
 ```
-GET /inapi/v3/stat/log
+GET /ai/inapi/v3/stat/log
   ?start=2026-04-14T00:00:00+08:00
   &end=2026-04-21T23:59:59+08:00
   &status=server_error
@@ -108,7 +108,7 @@ GET /inapi/v3/stat/log
 若用户想追溯某次具体失败：
 
 ```
-GET /inapi/v3/stat/log/detail?request_id=chatcmpl-abc123
+GET /ai/inapi/v3/stat/log/detail?request_id=chatcmpl-abc123
 ```
 
 **额外返回字段：**
@@ -123,7 +123,7 @@ GET /inapi/v3/stat/log/detail?request_id=chatcmpl-abc123
 若需对比不同模型的可用性，可对每个模型分别查询：
 
 ```
-GET /inapi/v3/stat/log
+GET /ai/inapi/v3/stat/log
   ?start=...&end=...
   &model=qwen-turbo
   &status=failure
@@ -190,10 +190,10 @@ GET /inapi/v3/stat/log
 
 > 正在查询近 7 天（2026-04-14 ～ 2026-04-21）的请求日志……
 
-（调用 `GET /inapi/v3/stat/log?start=2026-04-14T00:00:00+08:00&end=2026-04-21T23:59:59+08:00&page=1&page_size=1`，取 total = 12843）  
-（调用 `GET /inapi/v3/stat/log?...&status=failure&page=1&page_size=20`，取 total = 47，获取最近失败列表）  
-（调用 `GET /inapi/v3/stat/log?...&status=client_error&page=1&page_size=1`，取 total = 39）  
-（调用 `GET /inapi/v3/stat/log?...&status=server_error&page=1&page_size=1`，取 total = 8）
+（调用 `GET /ai/inapi/v3/stat/log?start=2026-04-14T00:00:00+08:00&end=2026-04-21T23:59:59+08:00&page=1&page_size=1`，取 total = 12843）  
+（调用 `GET /ai/inapi/v3/stat/log?...&status=failure&page=1&page_size=20`，取 total = 47，获取最近失败列表）  
+（调用 `GET /ai/inapi/v3/stat/log?...&status=client_error&page=1&page_size=1`，取 total = 39）  
+（调用 `GET /ai/inapi/v3/stat/log?...&status=server_error&page=1&page_size=1`，取 total = 8）
 
 ---
 
